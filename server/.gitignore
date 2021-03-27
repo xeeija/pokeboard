@@ -1,0 +1,14 @@
+### Node ###
+# Logs
+logs
+*.log
+
+# Dependency directories
+node_modules/
+
+# JS Output
+dist/
+
+# dotenv environment variables file
+.env
+.env*.local
