@@ -1,0 +1,58 @@
+html {
+  background-color: rgb(48, 48, 56);
+  color: #eee;
+  font-family:'Whitney', sans-serif;
+}
+
+input, textarea, button {
+  font-family: inherit;
+  background-color: rgb(56, 56, 64);
+  color: #eee;
+  border: #666 2px solid;
+  border-radius: 4px;
+  padding: 2px;
+  margin: 3px 8px;
+}
+
+textarea {
+  font-size: 1.1rem;
+  font-weight: normal;
+}
+
+button {
+  background-color: rgb(72, 72, 80);
+  padding: 2px 8px;
+  min-width: 100px;
+}
+
+button:hover {
+  background-color: rgb(80, 80, 88);
+}
+
+button:active {
+  background-color: rgb(88, 88, 96);
+}
+
+.spinning {
+  position: relative;
+  animation-name: spin;
+  animation-duration: 4s;
+  transition: transform 0.6s cubic-bezier(0.33, 1, 0.68, 1);
+  transform-origin: 50% 50%;
+}
+
+.wheel-sector {
+  stroke: #222;
+  stroke-width: 1px;
+  fill-opacity: 0.7;
+}
+
+.wheel-text {
+  font-size: 1.2rem;
+  font-weight: normal;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(2160deg) }
+}
