@@ -2,7 +2,7 @@ import React, { useState } from "react"
 
 interface Props { }
 
-export const LoginForm: React.FC<Props> = () => {
+export const Login: React.FC<Props> = () => {
 
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")

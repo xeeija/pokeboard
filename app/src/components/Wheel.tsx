@@ -1,11 +1,10 @@
-import React, { useRef } from "react"
+import React from "react"
 import "../style.css"
 
 interface Props {
-  // segments: number,
-  names?: string[],
   diameter: number,
-  // colors?: string[]
+  names?: string[],
+  colors?: string[]
 }
 
 interface Point {
@@ -30,16 +29,15 @@ const pointOnCircle = (center: Point, radius: number, angleDeg: number, angleOff
   }
 }
 
-export const RandomWheel: React.FC<Props> = ({ diameter, names = [] } /* { segments } */) => {
+export const Wheel: React.FC<Props> = ({
+  diameter,
+  names = [],
+  colors = ["orchid", "lightgreen", "aquamarine", "tomato", "cyan", "orange"],
+}) => {
 
   // Remove empty lines
   names = names.filter(x => x)
 
-  const wheelRef = useRef<SVGGElement>(null)
-
-  // wheelRef.current?.classList.
-
-  // const [names, setNames] = useState<string[]>([""])
   const segments = names.length
 
   const d: Sector = {
@@ -51,26 +49,16 @@ export const RandomWheel: React.FC<Props> = ({ diameter, names = [] } /* { segme
 
   const largeArcFlag = d.endAngle - d.startAngle <= 180 ? 0 : 1
 
-  const colors = [
-    "orchid",
-    "lightgreen",
-    "aquamarine",
-    "tomato",
-    "cyan",
-    "orange",
-  ]
-
   /* M   200       0         A   200     200     0 1        0 400     200     L    200  200  Z
     Move startPosX startPosY Arc radiusX radiusY ? largeArc ? arcPosX arcPosY Line posX posY Close path
     arcPos -> creates an arc from current position (like a cursor) to given arcPos */
   return (
     <svg {...{
-      // id: "random-wheel",
-      // className: "spinning",
       height: diameter,
       width: diameter,
+      viewBox: `0 0 ${diameter} ${diameter}`
     }} >
-      <g id="wheel-g" ref={wheelRef} className="" >
+      <g id="wheel-g" className="spinning" >
         <circle cx={d.center.x} cy={d.center.y} r={d.radius} stroke="#222" strokeWidth="5" fill={colors[colors.length / 2]} />
 
         {names.map((name, i) => {
@@ -81,7 +69,6 @@ export const RandomWheel: React.FC<Props> = ({ diameter, names = [] } /* { segme
           // replace with different color, if last color is the same as the first
           const colorIndex = i % colors.length
           const color = (colorIndex === 0 && i === segments - 1) ? colors[colors.length / 2] : colors[colorIndex]
-          // const color = colors[i % colorlength]
 
           return (
             <g key={"wheel-g-" + i}>
@@ -101,7 +88,7 @@ export const RandomWheel: React.FC<Props> = ({ diameter, names = [] } /* { segme
               </defs>
               <text color={color} >
                 <textPath
-                  // width attribute zeigt die Textlänge an
+                  // TODO: make text as big as possiblee
                   className="wheel-text"
                   textAnchor="end"
                   dominantBaseline="middle"

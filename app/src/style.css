@@ -33,11 +33,17 @@ button:active {
   background-color: rgb(88, 88, 96);
 }
 
-.spinning {
+ul > li {
+  display: inline-block;
+  margin: 4px;
+}
+
+a {
+  color: cornflowerblue;
+}
+
+#wheel-g {
   position: relative;
-  animation-name: spin;
-  animation-duration: 4s;
-  transition: transform 0.6s cubic-bezier(0.33, 1, 0.68, 1);
   transform-origin: 50% 50%;
 }
 
@@ -50,9 +56,4 @@ button:active {
 .wheel-text {
   font-size: 1.2rem;
   font-weight: normal;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(2160deg) }
 }

@@ -8,7 +8,7 @@ interface Credentials {
   confirmPassword?: string
 }
 
-export const RegisterForm: React.FC<Props> = () => {
+export const Register: React.FC<Props> = () => {
   
   const [{ username, password, confirmPassword }, setCredentials] = useState<Credentials>({ username: "", password: "" })
 

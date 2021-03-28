@@ -1,57 +1,45 @@
-import React, { useState } from 'react';
-import { Counter } from './components/Counter';
-import { LoginForm } from './components/LoginForm';
-import { RandomWheel } from './components/RandomWheel';
-import { RegisterForm } from './components/RegisterForm';
+import React from 'react';
+import { BrowserRouter, Link, Route, Switch } from "react-router-dom"
+import { Login } from './pages/Login';
+import { Register } from './pages/Register';
+import { Randomon } from './pages/Randomon';
 import "./style.css"
+import { Counter } from './components/Counter';
 
-const App: React.FC = () => {
-
-  const [names, setNames] = useState<string[]>([])
-
+export const App: React.FC = () => {
   return (
     <div className="App">
-      <div>
-        <p>Hello React</p>
-        <Counter>
-          {(count, setCount) => (
-            <div>
-              <div>{count}</div>
-              <button onClick={() => {
-                setCount(count + 1)
-                const wheel = document.querySelector("#wheel-g")
-                wheel?.classList.add("spinning")
-                setTimeout(() => {
-                  wheel?.classList.remove("spinning")
-                }, 4000);
-              }}>Click</button>
-            </div>
-          )}
-        </Counter>
-      </div>
+      <BrowserRouter>
+        <nav>
+          <ul>
+            <li><Link to="/">Home</Link></li>
+            <li><Link to="/login">Login</Link></li>
+            <li><Link to="/register">Register</Link></li>
+            <li><Link to="/randomon" >Randomon</Link></li>
+          </ul>
+        </nav>
+        <Switch>
+          <Route exact path="/" >
 
-      <br />
-      <div>Register:</div>
-      <RegisterForm />
+            <p>Hello React</p>
+            <Counter>
+              {(count, setCount) => (
+                <div>
+                  <div>{count}</div>
+                  <button onClick={() => setCount(count + 1)}>Click</button>
+                </div>
+              )}
+            </Counter>
 
-      <br />
-      <div>Login:</div>
-      <LoginForm />
+            <Randomon />
+          </Route>
 
-      <br />
-      <RandomWheel diameter={600} names={names} ></RandomWheel>
+          <Route exact path="/login" ><Login /></Route>
+          <Route exact path="/register" ><Register /></Route>
 
-      <textarea
-        style={{ height: 400, width: 200, marginLeft: 20 }}
-        value={names.join("\n")}
-        onChange={(e) => {
-          console.log(e.target.value)
-          setNames(e.target.value.split("\n"))
-        }}>
-      </textarea>
-
+          <Route exact path="/randomon" ><Randomon /></Route>
+        </Switch>
+      </BrowserRouter>
     </div>
   );
 }
-
-export default App;
