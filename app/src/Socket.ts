@@ -2,11 +2,21 @@ import { io, Socket } from "socket.io-client"
 
 let socket: Socket
 
-export const connectSocket = (room: string) => {
-  socket = io("http://localhost:4000")
-  console.log("connect socket")
+export const connectSocket = () => {
+  if (socket?.connected) {
+    console.log("Already connected", socket.id.substr(0, 4))
+    return
+  }
 
-  socket.emit("join", room)
+  socket = io("http://localhost:4000")
+  // console.log("connect socket")
+
+  // socket.emit("join", room)
+}
+
+export const createSocket = (callback: (id: string) => void) => {
+  socket.emit("create")
+  socket.once("create", callback)
 }
 
 export const joinSocket = (room: string) => {
@@ -27,6 +37,10 @@ export const onSocket = (event: string, callback: (...args: any[]) => void) => {
   // if (event !== "spin") { console.log("setup on socket", { socket, event, callback }) }
 
   socket.on(event, callback)
+  // socket.on(event, (...args) => {
+  //   console.log("got event", { event, args })
+  //   callback(...args)
+  // })
 
   // console.log("event", { listeners: socket.listeners(event) })
 }

@@ -9,6 +9,7 @@ import { HelloResolver } from "./resolvers/hello"
 import { buildSchema } from "type-graphql"
 import { createServer } from "http"
 import { Server } from "socket.io"
+import cryptoRandomString from 'crypto-random-string'
 
 interface Winner {
   name: string,
@@ -48,43 +49,68 @@ async function main() {
   // on "connection" -> serverside, on "connect" -> clientside
   io.on("connection", (socket) => {
     // Connect / disconnect
-    console.log(`${socket.id.substr(0, 4)} connected`)
-    socket.on("disconnect", () => { console.log(`${socket.id.substr(0, 4)} disconnected`) })
+    // console.log(`${socket.id.substr(0, 4)} connected`)
+    // socket.on("disconnect", () => { console.log(`${socket.id.substr(0, 4)} disconnected`) })
 
     let room = ""
 
     // Hello
-    socket.emit("hello", "You are now totali connected")
+    // socket.emit("hello", "You are now totali connected")
+
+    socket.on("create", () => {
+      // Create new room with random string
+
+      const newRoom = cryptoRandomString(10)
+
+      console.log(`${socket.id.substr(0, 4)} created room ${newRoom.substr(0, 4)}`)
+
+      namesMap.set(newRoom, ["Alice", "Bob", "Charlie"])
+
+      // TODO: Implement mechanism to remove unused rooms from map after a period
+
+      socket.emit("create", newRoom)
+    })
 
     // Join client to room and send current names and winners
     socket.on("join", (roomId: string) => {
-      console.log(`${socket.id.substr(0, 4)} joined room ${roomId}`)
-      room = roomId
+      // console.log({ namesMap, room: namesMap.has(room), roomId: namesMap.has(roomId) })
+
+      // Send an error, if the room does not exist in the names map
+      if (!namesMap.has(roomId)) {
+        console.log(`${socket.id.substr(0, 4)} attempted to join non-existent room ${roomId}`)
+        socket.emit("error", "join", "Room not found")
+        return
+      }
+
+      console.log(`${socket.id.substr(0, 4)} joined room ${roomId.substr(0, 4)}`)
+
+      // Join client to room and set his room
       socket.join(roomId)
+      room = roomId
 
       // Emit current names and winners to client
-      const names = namesMap.get(room) || ["Alice", "Bob"]
-      const winners = winnersMap.get(room) || []
+      const names = namesMap.get(roomId) // || ["Alice", "Bob"]
+      const winners = winnersMap.get(roomId) ?? []
       // console.log({ names, winners })
 
       socket.emit("join", names, winners)
     })
 
     socket.on("names", (newNames: string[]) => {
-      console.log(`${socket.id.substr(0, 4)} updated names`)
+      // console.log(`${socket.id.substr(0, 4)} updated names`)
       namesMap.set(room, newNames)
 
       socket.broadcast.to(room).emit("names", newNames)
     })
 
     socket.on("spin", (spinTime: number, rotateAmount: number) => {
-      console.log(`${socket.id.substr(0, 4)} does a barrel roll`)
+      // console.log(`${socket.id.substr(0, 4)} does a barrel roll`)
       socket.broadcast.to(room).emit("spin", spinTime, rotateAmount)
     })
 
     socket.on("winner", (winner: Winner) => {
       // Update winner list
-      console.log(`${socket.id.substr(0, 4)} picks a winner: ${winner.name}`)
+      // console.log(`${socket.id.substr(0, 4)} picks a winner: ${winner.name}`)
       const winners = winnersMap.get(room) ?? [] // ? [winnersMap.get(room), winner] : [winner]
       const newWinners = [...winners, winner]
 
@@ -95,7 +121,18 @@ async function main() {
 
   })
 
+  //#region DEBUG Rooms
+  /*
   // TODO: DEBUG to reset winner/name
+  app.use("/room", (req, res) => {
+    const room = req.url.substr(1)
+
+    res.status(200).send({
+      names: namesMap.get(room) ?? "",
+      winners: winnersMap.get(room) ?? ""
+    })
+  })
+
   app.use("/resetroom", (req, res) => {
     // console.log({ params: req.params, query: req.query, url: req.url })
 
@@ -110,6 +147,8 @@ async function main() {
     }
 
   })
+  */
+  //#endregion
 
   // const typeDefs = gql`
   // type Query {

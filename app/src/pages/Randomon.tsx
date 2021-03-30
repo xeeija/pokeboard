@@ -1,72 +1,23 @@
 import React, { useEffect, useRef, useState } from "react"
-import { useParams } from "react-router"
-import { Wheel } from "src/components/Wheel"
-import { connectSocket, disconnectSocket, emitSocket, offSocket, onSocket } from "src/Socket"
-// import { io } from "socket.io-client"
+import { useHistory, useParams } from "react-router"
+import { spin, Wheel } from "src/components/Wheel"
+import { connectSocket, disconnectSocket, emitSocket, joinSocket, offSocket, onSocket } from "src/Socket"
 
 interface Props { }
-
-interface SpinOptions {
-  names: string[],
-  duration?: number,
-  onStart?: (spinTime: number, rotateAmount: number) => void,
-  onFinish?: (winner: string) => void,
-  startRotation?: number,
-  rotateAmount?: number,
-}
 
 interface Winner {
   name: string,
   date: string,
 }
 
-const randInt = (min = 0, max: number) => Math.floor(Math.random() * (Math.floor(max) - Math.ceil(min) + 1) + Math.ceil(min))
-
-const spin = (options: SpinOptions) => {
-
-  const {
-    names,
-    duration = 6000,
-    onStart,
-    onFinish,
-    startRotation = 0,
-    rotateAmount = 0,
-  } = options
-
-  const wheel = document.getElementById("wheel-g")
-  const sectorDeg = 360 / names.length
-
-  // TODO: Replace with better random generator
-  const randoms = [
-    randInt(0, names.length - 1), // winner index
-    randInt(5, 6), // total rotations per spin
-    randInt(10, 90) // how much to rotate into the winner sector
-  ]
-
-  // 5-7 full rotations, then rotate to winner index and rotate randomly into the winner index
-  // rotate given amount from socket if another one is spinning
-  const rotateTo = rotateAmount || (randoms[1] * 360) + 360 - (randoms[0] * sectorDeg) - (sectorDeg * randoms[2] / 100) + 90
-
-  if (onStart) onStart(duration, rotateTo)
-
-  wheel?.animate([
-    { transform: `rotate(${startRotation}deg)` }, // 'from' keyframe
-    { transform: `rotate(${rotateTo}deg)` }, // 'to' keyframe
-  ], {
-    duration: duration,
-    easing: "cubic-bezier(0.12, 0, 0.25, 1)", // 0.1, 0, 0.4, 1 -- 0.33, 1, 0.68, 1 
-    fill: "forwards" // keep style of last keyframe
-  })?.addEventListener("finish", _ => {
-    if (onFinish) onFinish(names[randoms[0]])
-    // setRotation(rotateToDeg % 360)
-  })
-}
-
 export const Randomon: React.FC<Props> = () => {
+
+  // Variables
   const [names, setNames] = useState<string[]>([])
   const [winners, setWinners] = useState<Winner[]>([])
 
   const { id } = useParams<{ id: string }>()
+  const history = useHistory()
   const spinButtonRef = useRef<HTMLButtonElement>(null)
   const namesTextRef = useRef<HTMLTextAreaElement>(null)
 
@@ -78,7 +29,8 @@ export const Randomon: React.FC<Props> = () => {
   // because dependency array (2nd param) is empty []
   useEffect(() => {
     // Connect to socket and join the given room
-    connectSocket("tesetroom2")
+    connectSocket()
+    joinSocket(id)
 
     // console.log("useEffect connect")
 
@@ -89,6 +41,12 @@ export const Randomon: React.FC<Props> = () => {
       // console.log(" initial names and winners", { names, winners })
       setNames(names)
       setWinners(winners)
+    })
+
+    // Catch error from join event (eg. invalid room)
+    onSocket("error", (event: string, msg: string) => {
+      console.log("error", { event, msg })
+      history.replace("/randomon")
     })
 
     // joinSocket("testroom2")
@@ -102,17 +60,18 @@ export const Randomon: React.FC<Props> = () => {
     })
 
     // Listen to name updates from others
-    onSocket("names", (newNames: string[]) => {
+    onSocket("names", (names: string[]) => {
       // console.log("incoming names update", { newNames })
-      setNames(newNames)
+      setNames(names)
     })
 
     // returns, when component is dismounted (removed from dom): disconnect from socket
+    // also all listeners are removed upon disconnect
     return () => {
       // console.log("disconnected")
       disconnectSocket()
     }
-  }, [])
+  }, [id, history])
 
   // Runs when component is mounted and when names are updated
   useEffect(() => {
@@ -135,7 +94,6 @@ export const Randomon: React.FC<Props> = () => {
         onFinish: () => {
           if (spinButtonRef.current) { spinButtonRef.current.disabled = false }
           if (namesTextRef.current) { namesTextRef.current.disabled = false }
-
         }
       })
     })
@@ -145,53 +103,28 @@ export const Randomon: React.FC<Props> = () => {
 
   }, [names])
 
-  //#region Old useEffect
-  /*
-    useEffect(() => {
-      const socket = io("http://localhost:4000")
-
-      if (!socket) { console.log({ socket }); return }
-
-      socket.on("connect", () => {
-        console.log("connected")
-        socket.emit("join", "testroom")
-      })
-
-      // Do "same" spin, when someone else in the room is spinning
-      socket.on("spin", (spinTime, rotateAmount) => {
-        console.log("incoming spin")
-        spin({
-          spinTime,
-          rotateAmount,
-          onFinish: () => {
-            if (spinButtonRef.current) spinButtonRef.current.disabled = false
-          }
-        })
-      })
-
-      // Update winners from other (usually after spin)
-      socket.on("winner", (newWinners) => {
-        console.log("new winner list")
-        if (spinButtonRef.current) spinButtonRef.current.disabled = false
-        setWinners(newWinners)
-      })
-
-      // returns, when component is dismounted: disconnect from socket
-      return () => {
-        console.log("disconnected")
-        socket.disconnect()
-      }
-    })
-  */
-  //#endregion
 
   return (
     <div className="randomon">
 
-      <div>Your ID is "{id}"</div>
+      <p>
+        <b>Share Randomon</b> <input readOnly
+          id="shareRoom"
+          style={{ width: 350, fontSize: "1rem", textAlign: "center" }}
+          value={window.location.href}
+          onFocus={e => e.target.select()} />
 
-      <p>Create new Randomon Wheel</p>
-      <button onClick={() => { }} >Create</button>
+        {/* <button onClick={async () => {
+
+          const result = await navigator.permissions.query({ name: "clipboard-write" })
+
+          if (result.state === "granted" || result.state === "prompt") {
+            navigator.clipboard.writeText(window.location.href)
+          }
+          // document.querySelector("#shareButton").select()
+          // document.execCommand("copy")
+        }}>Copy</button> */}
+      </p>
 
       <div>
         <Wheel diameter={600} names={names} />
