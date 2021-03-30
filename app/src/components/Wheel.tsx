@@ -55,7 +55,7 @@ export const Wheel: React.FC<Props> = ({
   return (
     <svg {...{
       height: diameter,
-      width: diameter,
+      width: diameter + 40,
       viewBox: `0 0 ${diameter} ${diameter}`
     }} >
       <g id="wheel-g" className="spinning" >
@@ -102,14 +102,17 @@ export const Wheel: React.FC<Props> = ({
           )
         })}
 
-        {/* Middle circle */}
-        <circle cx={d.center.x} cy={d.center.y} r={d.radius * 0.1} fill="#333" stroke="#222" strokeWidth="3" />
-
         {/* <circle cx={startPos.x} cy={startPos.y} r="5" />
       <circle cx={endPos.x} cy={endPos.y} r="5" /> */}
         {/* {points.map((v, i) => <circle cx={v.x} cy={v.y} r="5" fill={colors[i % colors.length]} key={"segment" + i} />)} */}
 
       </g>
+
+      {/* Middle circle */}
+      <circle cx={d.center.x} cy={d.center.y} r={d.radius * 0.1} fill="#333" stroke="#222" strokeWidth="3" />
+
+      <path fill="#aaa" stroke="#222" strokeWidth="3" d={`M ${diameter - 25} ${diameter / 2} l 40 10 l 0 -20 Z`} />
+
     </svg>
   )
 }

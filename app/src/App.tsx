@@ -1,10 +1,10 @@
 import React from 'react';
+import "./style.css"
 import { BrowserRouter, Link, Route, Switch } from "react-router-dom"
+import { Home } from './pages/Home';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Randomon } from './pages/Randomon';
-import "./style.css"
-import { Counter } from './components/Counter';
 
 export const App: React.FC = () => {
   return (
@@ -19,24 +19,11 @@ export const App: React.FC = () => {
           </ul>
         </nav>
         <Switch>
-          <Route exact path="/" >
-
-            <p>Hello React</p>
-            <Counter>
-              {(count, setCount) => (
-                <div>
-                  <div>{count}</div>
-                  <button onClick={() => setCount(count + 1)}>Click</button>
-                </div>
-              )}
-            </Counter>
-
-            <Randomon />
-          </Route>
-
+          <Route exact path="/" ><Home /></Route>
           <Route exact path="/login" ><Login /></Route>
           <Route exact path="/register" ><Register /></Route>
 
+          {/* /random bzw /random/:id */}
           <Route exact path="/randomon" ><Randomon /></Route>
         </Switch>
       </BrowserRouter>
