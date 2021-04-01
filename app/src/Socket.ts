@@ -4,12 +4,12 @@ let socket: Socket
 
 export const connectSocket = () => {
   if (socket?.connected) {
-    console.log("Already connected", socket.id.substr(0, 4))
+    console.log("Already connected")
     return
   }
 
-  socket = io("http://localhost:4000")
-  // console.log("connect socket")
+  socket = io(process.env.REACT_APP_SERVER_URL ?? "")
+  // console.log(`connect at ${process.env.REACT_APP_SERVER_PORT}`)
 
   // socket.emit("join", room)
 }

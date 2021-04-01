@@ -1,5 +1,6 @@
 import React from "react"
 import "../style.css"
+import randomNumber from "random-number-csprng"
 
 interface Props {
   diameter: number,
@@ -42,7 +43,9 @@ const pointOnCircle = (center: Point, radius: number, angleDeg: number, angleOff
 
 const randInt = (min = 0, max: number) => Math.floor(Math.random() * (Math.floor(max) - Math.ceil(min) + 1) + Math.ceil(min))
 
-export const spin = (options: SpinOptions) => {
+const logistic = (x: number, max: number, min: number, a: number, k: number) => min + max - (max / (1 + a * Math.exp(-k * x)))
+
+export const spin = async (options: SpinOptions) => {
 
   const {
     names,
@@ -57,16 +60,13 @@ export const spin = (options: SpinOptions) => {
   const wheel = document.getElementById("wheel-g")
   const sectorDeg = 360 / names.length
 
-  // TODO: Replace with better random generator
-  const randoms = [
-    randInt(0, names.length - 1), // winner index
-    randInt(5, 6), // total rotations per spin
-    randInt(10, 90) // how much to rotate into the winner sector
-  ]
+  const winnerIndex = await randomNumber(0, names.length-1) // index of winner in the list of names
+  const rotations = randInt(5, 6) // total rotations per spin
+  const rotateIntoWinner = randInt(10, 90) / 100 // how much to rotate into the winner sector
 
   // 5-7 full rotations, then rotate to winner index and rotate randomly into the winner index
-  // rotate given amount from socket if another one is spinning
-  const rotateTo = rotateAmount || (randoms[1] * 360) + 360 - (randoms[0] * sectorDeg) - (sectorDeg * randoms[2] / 100) + 90
+  // rotate given amount from socket if another one is spinning, rotate by 90° to set "origin" to the right
+  const rotateTo = rotateAmount || (rotations * 360) + (360 - winnerIndex * sectorDeg) - (sectorDeg * rotateIntoWinner) + 90
 
   if (onStart) onStart(duration, rotateTo)
 
@@ -79,10 +79,10 @@ export const spin = (options: SpinOptions) => {
   ], {
     duration: duration,
     easing: "cubic-bezier(0.12, 0, 0.25, 1)", // 0.1, 0, 0.4, 1 -- 0.33, 1, 0.68, 1 
-    fill: "forwards", // keep style of last keyframe
+    fill: "forwards", // keep styling of last keyframe
     delay: 500,
   })?.addEventListener("finish", _ => {
-    if (onFinish) onFinish(names[randoms[0]], randoms[0])
+    if (onFinish) onFinish(names[winnerIndex], winnerIndex)
 
     if (fade) { document.getElementsByClassName("fade")[0].classList.remove("fade-in") }
     // setRotation(rotateToDeg % 360)
@@ -126,9 +126,18 @@ export const Wheel: React.FC<Props> = ({
         <circle cx={d.center.x} cy={d.center.y} r={d.radius} stroke="#222" strokeWidth="5" fill={colors[colors.length / 2]} />
 
         {names.map((name, i) => {
+          // Adjust textpath baseline, so names are better drawn in the middle
+          // const adjustTextBaseline = logistic(-names.length, 2, -0.5, 2, 0.3)
+          const adjustTextBaseline = 2 * Math.min(1, 30 / names.length * 0.9)
+
           const startPos = pointOnCircle(d.center, d.radius, d.endAngle, i * d.endAngle)
           const endPos = pointOnCircle(d.center, d.radius, d.startAngle, i * d.endAngle)
-          const middlePos = pointOnCircle(d.center, d.radius, (d.endAngle / 2) + 1, i * d.endAngle) // for text path
+          const middlePos = pointOnCircle(d.center, d.radius, (d.endAngle / 2) + adjustTextBaseline, i * d.endAngle) // for text path
+          
+          // Base fontsize based on length of the name (characters), longer names are smaller
+          // const fontSizeNamesMultiplier = logisticInvert(names.length, 1, 0.9, 1, 0.2)
+          const baseFontsize = logistic(name.length / 1.3, diameter / 240, diameter / 440, 1.7, 0.22)
+          const fontSizeNamesMultiplier = Math.max(Math.min(1, 20 / names.length * 1.3), 0.5)
 
           // replace with different color, if last color is the same as the first
           const colorIndex = i % colors.length
@@ -157,8 +166,9 @@ export const Wheel: React.FC<Props> = ({
                   textAnchor="end"
                   dominantBaseline="middle"
                   startOffset="92%"
+                  fontSize={`${baseFontsize * fontSizeNamesMultiplier}em`}
                   xlinkHref={"#wheel-text-path-" + i} >
-                  {name}
+                  {name.length <= 23 ? name : name.substring(0, 21) + "..."}
                 </textPath>
               </text>
               {/* <circle cx={middlePos.x} cy={middlePos.y} r="5" fill={color} /> */}

@@ -106,7 +106,7 @@ export const Randomon: React.FC<Props> = () => {
 
   return (
     <div className="randomon">
-
+      
       <p>
         <b>Share Randomon</b> <input readOnly
           id="shareRoom"
@@ -131,7 +131,6 @@ export const Randomon: React.FC<Props> = () => {
 
         <textarea
           ref={namesTextRef}
-          style={{ height: 400, width: 200, marginLeft: 20 }}
           value={names.join("\n")}
           onChange={e => {
             const nameList = e.target.value.split("\n")

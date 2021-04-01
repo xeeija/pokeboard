@@ -39,7 +39,7 @@ async function main() {
 
   const io = new Server(httpServer, {
     cors: {
-      origin: "http://localhost:3000"
+      origin: process.env.ORIGIN_URL?.split(" ")
     }
   })
 
@@ -62,7 +62,7 @@ async function main() {
 
       const newRoom = cryptoRandomString(10)
 
-      console.log(`${socket.id.substr(0, 4)} created room ${newRoom.substr(0, 4)}`)
+      console.log(`${socket.id.substr(0, 4)} created room ${newRoom}`) // ${newRoom.substr(0, 4)}`)
 
       namesMap.set(newRoom, ["Alice", "Bob", "Charlie"])
 
@@ -82,7 +82,7 @@ async function main() {
         return
       }
 
-      console.log(`${socket.id.substr(0, 4)} joined room ${roomId.substr(0, 4)}`)
+      // console.log(`${socket.id.substr(0, 4)} joined room ${roomId.substr(0, 4)}`)
 
       // Join client to room and set his room
       socket.join(roomId)
@@ -187,8 +187,8 @@ async function main() {
   }
   test()
 
-  httpServer.listen(4000, () => {
-    console.log(` Server started at http://localhost:4000`)
+  httpServer.listen(process.env.SERVER_PORT, () => {
+    console.log(` Server started at http://localhost:${process.env.SERVER_PORT}`)
   })
 
 }

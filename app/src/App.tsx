@@ -7,6 +7,9 @@ import { Register } from './pages/Register';
 import { Randomon } from './pages/Randomon';
 import { RandomonHome } from './pages/RandomonHome';
 import { RandomonPopout } from './pages/RandomonPopout';
+import dotenv from "dotenv"
+
+dotenv.config()
 
 export const App: React.FC = () => {
   return (
@@ -15,14 +18,16 @@ export const App: React.FC = () => {
         {/* Popout Randomon should not have any nav links etc. */}
         <Switch>
           <Route exact path="/randomon/:id/popout" ><RandomonPopout /></Route>
-          <nav>
-            <ul>
-              <li><Link to="/">Home</Link></li>
-              <li><Link to="/login">Login</Link></li>
-              <li><Link to="/register">Register</Link></li>
-              <li><Link to="/randomon" >Randomon</Link></li>
-            </ul>
-          </nav>
+          <Route>
+            <nav>
+              <ul>
+                <li><Link to="/">Home</Link></li>
+                <li><Link to="/login">Login</Link></li>
+                <li><Link to="/register">Register</Link></li>
+                <li><Link to="/randomon" >Randomon</Link></li>
+              </ul>
+            </nav>
+          </Route>
         </Switch>
         <Switch>
           <Route exact path="/" ><Home /></Route>

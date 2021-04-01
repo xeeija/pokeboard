@@ -1,7 +1,7 @@
 html {
   background-color: rgb(48, 48, 56);
   color: #eee;
-  font-family:'Whitney', sans-serif;
+  font-family: 'Ubuntu', sans-serif;
 }
 
 input, textarea, button {
@@ -15,8 +15,9 @@ input, textarea, button {
 }
 
 textarea {
-  font-size: 1.1rem;
-  font-weight: normal;
+  height: 500px;
+  width: 240px;
+  margin-left: 20px;
 }
 
 button {
@@ -52,15 +53,14 @@ a {
 .fade-in {
   opacity: 100%;
   visibility: visible;
-  transition: all 0.5s ease-out;
-
+  transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
 }
 
 /* Fades the popout wheel out after a delay */
 .fade:not(.fade-in) {
   opacity: 0%;
   visibility: hidden;
-  transition: all 0.5s ease-out 5s;
+  transition: opacity 0.5s ease-out 5s, visibility 0.5s ease-out 5s;
 }
 
 #wheel-g {
@@ -75,6 +75,7 @@ a {
 }
 
 .wheel-text {
-  font-size: 1.2rem;
-  font-weight: normal;
+  /* font-size: 1.5vw; */
+  /* font-weight: 400; */
+  font-size-adjust: 0.45;
 }
