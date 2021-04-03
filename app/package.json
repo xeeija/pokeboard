@@ -1,6 +1,7 @@
 {
   "name": "app",
   "version": "0.1.0",
+  "homepage": "http://xeeija.com/pokeboard",
   "private": true,
   "eslintConfig": {
     "extends": [

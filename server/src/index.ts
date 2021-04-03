@@ -38,6 +38,7 @@ async function main() {
   const httpServer = createServer(app)
 
   const io = new Server(httpServer, {
+    path: process.env.SOCKET_PATH,
     cors: {
       origin: process.env.ORIGIN_URL?.split(" ")
     }

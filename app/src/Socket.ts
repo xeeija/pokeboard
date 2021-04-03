@@ -8,8 +8,8 @@ export const connectSocket = () => {
     return
   }
 
-  socket = io(process.env.REACT_APP_SERVER_URL ?? "")
-  // console.log(`connect at ${process.env.REACT_APP_SERVER_PORT}`)
+  socket = io(process.env.REACT_APP_SOCKET_URL ?? "", { path: process.env.REACT_APP_SOCKET_PATH })
+  // console.log(`connect at ${process.env.REACT_APP_SOCKET_URL}`)
 
   // socket.emit("join", room)
 }
