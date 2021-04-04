@@ -10,6 +10,9 @@ import { buildSchema } from "type-graphql"
 import { createServer } from "http"
 import { Server } from "socket.io"
 import cryptoRandomString from 'crypto-random-string'
+import dotenv from "dotenv"
+
+dotenv.config()
 
 interface Winner {
   name: string,
