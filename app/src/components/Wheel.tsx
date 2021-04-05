@@ -1,5 +1,5 @@
 import React from "react"
-import "../style.css"
+// import "../style.css"
 import randomNumber from "random-number-csprng"
 
 interface Props {
