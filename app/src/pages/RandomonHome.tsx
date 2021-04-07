@@ -17,7 +17,7 @@ export const RandomonHome: React.FC<Props> = () => {
   })
 
   return (
-    <Paper elevation={2} className={cl.paper} >
+    <Paper elevation={2} className={cl.pad} >
       <Typography paragraph>You don't have any open Random Wheels.</Typography>
 
       <Button variant="contained" color="secondary" onClick={() => {

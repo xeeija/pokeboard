@@ -22,7 +22,7 @@ export const App: React.FC = () => {
         <Route><Navbar /></Route>
 
       </Switch>
-      <Container className={cl.container}>
+      <Container className={cl.pad}>
         <Switch>
 
           <Route exact path="/" >

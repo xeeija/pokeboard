@@ -60,7 +60,7 @@ export const spin = async (options: SpinOptions) => {
   const wheel = document.getElementById("wheel-g")
   const sectorDeg = 360 / names.length
 
-  const winnerIndex = await randomNumber(0, names.length-1) // index of winner in the list of names
+  const winnerIndex = await randomNumber(0, names.length - 1) // index of winner in the list of names
   const rotations = randInt(5, 6) // total rotations per spin
   const rotateIntoWinner = randInt(10, 90) / 100 // how much to rotate into the winner sector
 
@@ -122,7 +122,7 @@ export const Wheel: React.FC<Props> = ({
       viewBox: `0 0 ${diameter + arrowHeight * 1.5} ${diameter}`,
       className: fade ? "fade" : ""
     }} >
-      <g id="wheel-g" >
+      <g id="wheel-g" style={{ transformOrigin: "48.51% 50%" }} >
         <circle cx={d.center.x} cy={d.center.y} r={d.radius} stroke="#222" strokeWidth="5" fill={colors[colors.length / 2]} />
 
         {names.map((name, i) => {
@@ -133,7 +133,7 @@ export const Wheel: React.FC<Props> = ({
           const startPos = pointOnCircle(d.center, d.radius, d.endAngle, i * d.endAngle)
           const endPos = pointOnCircle(d.center, d.radius, d.startAngle, i * d.endAngle)
           const middlePos = pointOnCircle(d.center, d.radius, (d.endAngle / 2) + adjustTextBaseline, i * d.endAngle) // for text path
-          
+
           // Base fontsize based on length of the name (characters), longer names are smaller
           // const fontSizeNamesMultiplier = logisticInvert(names.length, 1, 0.9, 1, 0.2)
           const baseFontsize = logistic(name.length / 1.3, diameter / 240, diameter / 440, 1.7, 0.22)
