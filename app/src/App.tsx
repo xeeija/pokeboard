@@ -6,6 +6,7 @@ import { RandomonPopout } from './pages/RandomonPopout';
 import { Navbar } from './components/Navbar';
 import { Container } from '@material-ui/core';
 import { useStyles } from './Theme';
+import { FlexTest } from './pages/FlexTest';
 // import "./style.css"
 
 export const App: React.FC = () => {
@@ -35,6 +36,10 @@ export const App: React.FC = () => {
 
           <Route exact path="/randomon/:id" >
             <Randomon />
+          </Route>
+
+          <Route exact path="/flextest" >
+            <FlexTest />
           </Route>
 
         </Switch>

@@ -36,12 +36,19 @@ export const theme = createMuiTheme({
 
 // #282c34, #343943
 
+// Helper function for add multiple classes
+export const cls = (...classes: string[]) => classes.join(" ")
+
 // Combine styles with clsx(a, b, ...)
 export const useStyles = makeStyles(({ spacing, transitions }) => createStyles({
   root: {
-    display: "flex",
-    flexGrow: 1
+    flexGrow: 1,
+    alignItems: "stretch",
+    "& $stretch": {
+      height: "100%",
+    }
   },
+  stretch: { },
   //#region Padding / Margin
   pad: {
     padding: spacing(2)
@@ -63,7 +70,7 @@ export const useStyles = makeStyles(({ spacing, transitions }) => createStyles({
   },
   //#endregion
   list: {
-    maxHeight: 548,
+    maxHeight: 512,
     overflow: "auto",
     maxWidth: "100%",
   },

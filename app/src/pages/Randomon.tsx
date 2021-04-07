@@ -153,9 +153,9 @@ export const Randomon: React.FC<Props> = () => {
 
   // TODO: Replace paper with card, so all have the same layout
   return (
-    <>
+    <Container className={cl.root}>
       {/* Row */}
-      <Grid container spacing={2} alignItems="flex-start">
+      <Grid container spacing={2}>
 
         {/* First Column */}
         <Grid item container xs={8} spacing={2}>
@@ -168,64 +168,67 @@ export const Randomon: React.FC<Props> = () => {
           </Grid>
 
           {/* Winner */}
-          <Grid item xs >
+          <Grid item xs>
             <Paper className={cl.pad}>
-              <Grid item xs>
+              <Grid container>
 
-                <Container>
-                  <Typography>And the winner is ...</Typography>
-                  <Typography variant="h4">
-                    {winners[0]?.name ?? ""}
-                  </Typography>
-                </Container>
+                <Grid item xs>
+                  <Container>
+                    <Typography color="textSecondary">
+                      And the winner is ...
+                    </Typography>
+                    <Typography variant="h4" color={winners.length > 0 ? "textPrimary" : "textSecondary"}>
+                      {winners[0]?.name ?? "¯\\_(ツ)_/¯"}
+                    </Typography>
+                  </Container>
+                </Grid>
 
-              </Grid>
+                <Grid item style={{ alignSelf: "center" }}>
+                  <Button ref={spinButtonRef}
+                    variant="contained"
+                    color="secondary"
+                    onClick={() => {
+                      // console.log({ names })
+                      if (spinButtonRef.current) spinButtonRef.current.disabled = true
+                      if (namesTextRef.current) namesTextRef.current.disabled = true
 
-              <Grid item xs style={{ textAlign: "right" }} >
-                <Button ref={spinButtonRef}
-                  variant="contained"
-                  color="secondary"
-                  onClick={() => {
-                    // console.log({ names })
-                    if (spinButtonRef.current) spinButtonRef.current.disabled = true
-                    if (namesTextRef.current) namesTextRef.current.disabled = true
+                      spin({
+                        names,
+                        onStart: (duration, rotateAmount) => {
+                          // console.log({ spinTime, rotateAmount })
+                          emitSocket("spin", duration, rotateAmount)
+                        },
+                        onFinish: winnerName => {
+                          if (spinButtonRef.current) spinButtonRef.current.disabled = false
+                          if (namesTextRef.current) namesTextRef.current.disabled = false
 
-                    spin({
-                      names,
-                      onStart: (duration, rotateAmount) => {
-                        // console.log({ spinTime, rotateAmount })
-                        emitSocket("spin", duration, rotateAmount)
-                      },
-                      onFinish: winnerName => {
-                        if (spinButtonRef.current) spinButtonRef.current.disabled = false
-                        if (namesTextRef.current) namesTextRef.current.disabled = false
+                          const winner: Winner = {
+                            name: winnerName,
+                            date: new Date(Date.now()).toLocaleTimeString()
+                          }
 
-                        const winner: Winner = {
-                          name: winnerName,
-                          date: new Date(Date.now()).toLocaleTimeString()
+                          // setWinner(w)
+                          setWinners([winner, ...winners])
+
+                          emitSocket("winner", winner)
                         }
-
-                        // setWinner(w)
-                        setWinners([winner, ...winners])
-
-                        emitSocket("winner", winner)
-                      }
-                    })
-                  }}>
-                  Spin
+                      })
+                    }}>
+                    Spin
                 </Button>
-              </Grid>
+                </Grid>
 
+              </Grid>
             </Paper>
           </Grid>
 
         </Grid>
 
         {/* Second column */}
-        <Grid item container xs spacing={2} alignItems="stretch" >
+        <Grid item container xs spacing={2} direction="column" >
 
           {/* Share Link */}
-          <Grid item xs={12}>
+          <Grid item>
             <Paper className={cl.pad}>
               <TextField
                 fullWidth
@@ -240,8 +243,8 @@ export const Randomon: React.FC<Props> = () => {
           </Grid>
 
           {/* Name/Winner List */}
-          <Grid item xs >
-            <Paper>
+          <Grid item xs>
+            <Paper className={cl.stretch}>
 
               <Tabs
                 value={tab}
@@ -380,6 +383,6 @@ export const Randomon: React.FC<Props> = () => {
         </ul>
       </div> */}
 
-    </>
+    </Container >
   )
 }
