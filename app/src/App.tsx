@@ -7,6 +7,7 @@ import { Navbar } from './components/Navbar';
 import { Container } from '@material-ui/core';
 import { useStyles } from './Theme';
 import { FlexTest } from './pages/FlexTest';
+import { Footer } from './components/Footer';
 // import "./style.css"
 
 export const App: React.FC = () => {
@@ -44,6 +45,16 @@ export const App: React.FC = () => {
 
         </Switch>
       </Container>
+      <Switch>
+
+        {/* Popout should not have a footer */}
+        <Route exact path="/randomon/:id/popout" />
+
+        <Route>
+          <Footer />
+        </Route>
+
+      </Switch>
     </BrowserRouter>
   );
 }

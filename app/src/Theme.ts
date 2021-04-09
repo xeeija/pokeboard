@@ -59,6 +59,9 @@ export const useStyles = makeStyles(({ spacing, transitions, palette }) => creat
   padb: {
     paddingBottom: spacing(2)
   },
+  padr: {
+    paddingRight: spacing(2)
+  },
   mar: {
     margin: spacing(2),
   },
@@ -66,6 +69,10 @@ export const useStyles = makeStyles(({ spacing, transitions, palette }) => creat
     marginTop: spacing(2)
   },
   //#endregion
+  // flexGrow makes the Buttons after ths element (eg. appbar title) align right
+  grow: {
+    flexGrow: 1,
+  },
   list: {
     overflow: "auto",
     maxWidth: "100%",
@@ -100,6 +107,9 @@ export const useStyles = makeStyles(({ spacing, transitions, palette }) => creat
   },
   endAdornment: {
     alignItems: 'center'
+  },
+  footer: {
+    opacity: 0.5,
   },
   //#region Wheel
   wheelEmpty: {

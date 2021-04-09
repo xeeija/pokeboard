@@ -210,12 +210,12 @@ export const Randomon: React.FC<Props> = () => {
 
   // TODO: Replace paper with card, so all have the same layout
   return (
-    <Container className={cl.root}>
+    <Container className={cl.root} disableGutters>
       {/* Row */}
       <Grid container spacing={2}>
 
         {/* First Column */}
-        <Grid item container xs={8} spacing={2}>
+        <Grid item container md={8} spacing={2}>
 
           {/* Wheel */}
           <Grid item xs={12}>
@@ -343,7 +343,7 @@ export const Randomon: React.FC<Props> = () => {
         </Grid>
 
         {/* Second column */}
-        <Grid item container xs={4} spacing={2} direction="column" zeroMinWidth >
+        <Grid item container md spacing={2} direction="column" zeroMinWidth >
 
           {/* Share Link */}
           <Grid item>
@@ -355,7 +355,8 @@ export const Randomon: React.FC<Props> = () => {
                 label="Share"
                 size="small"
                 defaultValue={`${window.location.host}${window.location.pathname}`}
-                InputProps={{ readOnly: true }}
+                InputProps={{ readOnly: true }} // Reacts base 'Input' element
+                inputProps={{ style: { textAlign: "center" } }} // underlying (native) input element
                 onFocus={e => e.target.select()} />
             </Paper>
           </Grid>
