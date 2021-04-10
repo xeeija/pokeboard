@@ -109,7 +109,7 @@ export const useStyles = makeStyles(({ spacing, transitions, palette }) => creat
     alignItems: 'center'
   },
   footer: {
-    opacity: 0.5,
+    color: "#8b8f93d8"
   },
   //#region Wheel
   wheelEmpty: {

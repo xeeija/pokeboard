@@ -9,7 +9,7 @@ export const Footer: React.FC<Props> = () => {
   return (
     <Container component="footer" className={cls(cl.padh, cl.padb)}>
       <Typography variant="subtitle2" color="textSecondary" className={cl.footer}>
-        &copy; 2021 Pokeboard &bull; Developed by Xeeija
+        &copy; 2021 Pokeboard &bull; Made with 💜 by Xeeija
       </Typography>
     </Container>
   )
