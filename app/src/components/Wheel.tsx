@@ -176,7 +176,7 @@ export const Wheel: React.FC<Props> = ({
           const middlePos = pointOnCircle(d.center, d.radius, (d.endAngle / 2) + adjustTextBaseline, i * d.endAngle) // for text path
 
           // Base fontsize based on length of the name (characters), longer names are smaller
-          const baseFontsize = logistic({ x: name.length, max: 2.6, min: 1.5, a: 0.7, b: 16.5, inverse: true })
+          const baseFontsize = logistic({ x: name.length, max: 2.6, min: 1.5, a: 0.7, b: 16.5, inverse: true }) * (diameter / 600)
 
           // Scale names based on number of names in the wheel, size is smaller with more entries 
           const fontSizeNamesMultiplier = logistic({ x: names.length, max: 1, min: 0.6, a: 0.8, b: 34, inverse: true })

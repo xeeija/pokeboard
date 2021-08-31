@@ -1,19 +1,17 @@
 import React, { useEffect, useRef, useState } from "react"
 import { useHistory, useParams } from "react-router"
-import {
-  Badge,
-  Button, Container, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid, IconButton,
-  InputAdornment, List, ListItem, ListItemSecondaryAction, ListItemText, Paper, Tab, Tabs, TextField, Typography
-} from "@material-ui/core"
-import { RotateLeftRounded, DeleteRounded, HourglassEmptyRounded, SendRounded, CollectionsRounded } from "@material-ui/icons"
+import { Badge, Button, Container, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid, Paper, Tab, Tabs, TextField, Typography } from "@material-ui/core"
+import { RotateLeftRounded, DeleteRounded, CollectionsRounded } from "@material-ui/icons"
 import { TabPanel } from "src/components/TabPanel"
 import { spin, Wheel } from "src/components/Wheel"
 import { connectSocket, disconnectSocket, emitSocket, joinSocket, offSocket, onSocket } from "src/Socket"
 import { cls, useStyles } from "src/Theme"
+import { WinnerList } from "src/components/WinnerList"
+import { NamesList } from "src/components/NamesList"
 
 interface Props { }
 
-interface Winner {
+export interface Winner {
   name: string,
   date: string,
 }
@@ -253,7 +251,7 @@ export const Randomon: React.FC<Props> = () => {
                     aria-describedby="winner-dialog-description">
                     <Typography component={DialogTitle} color="textSecondary" id="winner-dialog-title">
                       Congratulations!
-                      </Typography>
+                    </Typography>
                     <DialogContent>
                       <DialogContentText id="winner-dialog-description">
                         <Typography color="textPrimary" variant="h4">{lastWinner?.name ?? ""}</Typography>
@@ -271,6 +269,7 @@ export const Randomon: React.FC<Props> = () => {
 
                 </Grid>
 
+                {/* Popout Button */}
                 <Grid item>
                   <Button
                     variant="outlined"
@@ -288,7 +287,7 @@ export const Randomon: React.FC<Props> = () => {
                   <Button
                     variant="outlined"
                     className={cl.errorOutlined}
-                    disabled={spinning}
+                    disabled={spinning || names.length === 0}
                     startIcon={<DeleteRounded />}
                     onClick={() => setClearDialogOpen(true)}>
                     Clear
@@ -377,80 +376,12 @@ export const Randomon: React.FC<Props> = () => {
 
               {/* Names Tab */}
               <TabPanel index={0} activeTab={tab}>
-                <List className={cl.list} style={{ maxHeight: 490 }}>
-                  {names.map((name, i) => (
-                    <ListItem key={i} role={undefined} dense button className={cl.hoverBase}>
-                      <ListItemText id={`name-list-${i}`} primary={name} />
-                      <ListItemSecondaryAction className={cl.hoverItem}>
-                        <IconButton onClick={() => deleteName(i)}>
-                          <DeleteRounded fontSize="small" color="error" />
-                        </IconButton>
-                        {/* <Checkbox edge="end" onChange={handleListToggle(name)} checked={checkedNames.includes(name)} 
-                        inputProps={{ 'aria-labelledby': `name-list-${name}` }} /> */}
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                  ))}
-                </List>
-
-                <TextField className={cl.mart}
-                  variant="filled"
-                  color="primary"
-                  size="small"
-                  label="Add name"
-                  fullWidth
-                  // disabled={spinning}
-                  onKeyPress={e => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault()
-                      addName(addNameRef.current?.value ?? "")
-                    }
-                  }}
-                  InputProps={{
-                    inputRef: addNameRef,
-                    disableUnderline: true,
-                    endAdornment: (
-                      <InputAdornment className={cl.endAdornment} position="end">
-                        <IconButton aria-label="Add name" edge="end" disabled={spinning}
-                          onClick={() => addName(addNameRef.current?.value ?? "")}>
-                          <SendRounded />
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }} />
-
+                <NamesList names={names} spinning={spinning} addNameRef={addNameRef} addName={addName} deleteName={deleteName} />
               </TabPanel>
 
               {/* Winners Tab */}
               <TabPanel index={1} activeTab={tab}>
-                {winners.length > 0 ?
-                  // Winners present
-                  <>
-                    <Container className={cl.latestWinner}>
-                      <Typography variant="overline" color="textSecondary">
-                        Latest winner &nbsp;&bull; {winners[winners.length - 1]?.date}
-                      </Typography>
-                      <Typography variant="h5" noWrap >
-                        {winners[winners.length - 1]?.name}
-                        {/* <Typography component="span" className={cl.padh} color="textSecondary">
-                          {winners[winners.length - 1]?.date}
-                        </Typography> */}
-                      </Typography>
-                    </Container>
-
-                    <List className={cl.list} style={{ maxHeight: 474 }}>
-                      {winners.slice(0, winners.length - 1).reverse().map(({ name, date }, i) => (
-                        <ListItem key={`winner-list-${i}`} role={undefined} dense button>
-                          <ListItemText primary={name} secondary={date} />
-                        </ListItem>
-                      ))}
-                    </List>
-                  </> :
-                  // No winners yet
-                  <Container className={cl.pad} style={{ textAlign: "center" }}>
-                    <HourglassEmptyRounded className={cl.mar} fontSize="large" />
-                    <Typography variant="h6" className={cl.padb}>No one has won yet ...</Typography>
-                  </Container>
-                }
+                <WinnerList winners={winners} />
               </TabPanel>
 
             </Paper>
