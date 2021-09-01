@@ -1,7 +1,6 @@
 {
   "name": "app",
   "version": "0.1.0",
-  "homepage": "http://xeeija.com/pokeboard",
   "private": true,
   "eslintConfig": {
     "extends": [
@@ -32,6 +31,8 @@
     "@types/react-router-dom": "^5.1.7"
   },
   "dependencies": {
+    "@material-ui/core": "^4.11.3",
+    "@material-ui/icons": "^4.11.2",
     "@testing-library/jest-dom": "^5.11.9",
     "@testing-library/react": "^11.2.5",
     "@testing-library/user-event": "^12.8.3",

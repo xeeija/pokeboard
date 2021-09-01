@@ -1,11 +1,17 @@
 import React, { useEffect, useRef, useState } from "react"
 import { useHistory, useParams } from "react-router"
+import { Badge, Button, Container, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid, Paper, Tab, Tabs, TextField, Typography } from "@material-ui/core"
+import { RotateLeftRounded, DeleteRounded, CollectionsRounded } from "@material-ui/icons"
+import { TabPanel } from "src/components/TabPanel"
 import { spin, Wheel } from "src/components/Wheel"
 import { connectSocket, disconnectSocket, emitSocket, joinSocket, offSocket, onSocket } from "src/Socket"
+import { cls, useStyles } from "src/Theme"
+import { WinnerList } from "src/components/WinnerList"
+import { NamesList } from "src/components/NamesList"
 
 interface Props { }
 
-interface Winner {
+export interface Winner {
   name: string,
   date: string,
 }
@@ -15,11 +21,26 @@ export const Randomon: React.FC<Props> = () => {
   // Variables
   const [names, setNames] = useState<string[]>([])
   const [winners, setWinners] = useState<Winner[]>([])
+  // const [checkedNames, setCheckedNames] = useState<string[]>([])
+  const [spinning, setSpinning] = useState(false)
 
+  // Routing
   const { id } = useParams<{ id: string }>()
   const history = useHistory()
-  const spinButtonRef = useRef<HTMLButtonElement>(null)
-  const namesTextRef = useRef<HTMLTextAreaElement>(null)
+
+  // Elements, Styling
+  const cl = useStyles()
+  // const spinButtonRef = useRef<HTMLButtonElement>(null)
+  // const namesTextRef = useRef<HTMLTextAreaElement>(null)
+
+  const addNameRef = useRef<HTMLInputElement>(null)
+
+  const [tab, setTab] = useState(0)
+  const [winnerDialogOpen, setWinnerDialogOpen] = useState(false)
+  const [clearDialogOpen, setClearDialogOpen] = useState(false)
+
+  const [lastWinner, setLastWinner] = useState<{ name: string, index: number } | null>(null)
+  // const [nameText, setNameText] = useState("")
 
   // const [rotation, setRotation] = useState(0)
   // const [winner, setWinner] = useState("")
@@ -54,8 +75,9 @@ export const Randomon: React.FC<Props> = () => {
     // Listen to winner updates from other (should only occur after spins)
     onSocket("winner", (newWinners: Winner[]) => {
       // console.log("new winner list", { newWinners, spinButtonRef })
-      if (spinButtonRef.current) { spinButtonRef.current.disabled = false }
-      if (namesTextRef.current) { namesTextRef.current.disabled = false }
+      // if (spinButtonRef.current) { spinButtonRef.current.disabled = false }
+      // if (namesTextRef.current) { namesTextRef.current.disabled = false }
+      setSpinning(false)
       setWinners(newWinners)
     })
 
@@ -84,16 +106,18 @@ export const Randomon: React.FC<Props> = () => {
     // Listen to other spins, and show the same spin, when others are spinning
     onSocket("spin", (duration: number, rotateAmount: number) => {
       // console.log("incoming spin", { duration, rotateAmount, spinButtonRef })
-      if (spinButtonRef.current) { spinButtonRef.current.disabled = true }
-      if (namesTextRef.current) { namesTextRef.current.disabled = true }
+      // if (spinButtonRef.current) { spinButtonRef.current.disabled = true }
+      // if (namesTextRef.current) { namesTextRef.current.disabled = true }
+      setSpinning(true)
 
       spin({
         names,
         duration,
         rotateAmount,
         onFinish: () => {
-          if (spinButtonRef.current) { spinButtonRef.current.disabled = false }
-          if (namesTextRef.current) { namesTextRef.current.disabled = false }
+          // if (spinButtonRef.current) { spinButtonRef.current.disabled = false }
+          // if (namesTextRef.current) { namesTextRef.current.disabled = false }
+          setSpinning(false)
         }
       })
     })
@@ -103,81 +127,269 @@ export const Randomon: React.FC<Props> = () => {
 
   }, [names])
 
+  // TODO: Confirmation, and Snackbar "Deleted name"
+  const deleteName = (index: number) => {
+    // newNames = names would set newNames to the same reference as names
+    // newNames = [...names] creates a new list with the destructured names
+    const newNames = [...names]
+    newNames.splice(index, 1)
+    setNames(newNames)
+    emitSocket("names", newNames)
+  }
+  const addName = (name: string) => {
+    if (spinning) return // dont do anything while spinning
+    if (name.trim() === "") {
+      if (addNameRef.current) addNameRef.current.value = ""
+      return
+    }
 
+    const newNames = [...names, name]
+    setNames(newNames)
+    emitSocket("names", newNames)
+
+    if (addNameRef.current) addNameRef.current.value = ""
+  }
+
+  const handleSpin = () => {
+    // console.log({ names })
+    // if (spinButtonRef.current) spinButtonRef.current.disabled = true
+    // if (namesTextRef.current) namesTextRef.current.disabled = true
+    setSpinning(true)
+
+    spin({
+      names,
+      onStart: (duration, rotateAmount) => {
+        // console.log({ spinTime, rotateAmount })
+        emitSocket("spin", duration, rotateAmount)
+      },
+      onFinish: (winnerName, winnerIndex) => {
+        // if (spinButtonRef.current) spinButtonRef.current.disabled = false
+        // if (namesTextRef.current) namesTextRef.current.disabled = false
+        setSpinning(false)
+
+        const winner: Winner = {
+          name: winnerName,
+          date: new Date(Date.now()).toLocaleTimeString()
+        }
+
+        // Remove winner when "remove" is clicked in dialog
+        setLastWinner({ name: winnerName, index: winnerIndex })
+        handleWinnerDialogOpen()
+
+        // setWinner(w)
+        setWinners([...winners, winner])
+
+        emitSocket("winner", winner)
+      }
+    })
+  }
+
+  const handleWinnerDialogOpen = () => setWinnerDialogOpen(true)
+  const handleWinnerDialogClose = () => {
+    setLastWinner(null)
+    setWinnerDialogOpen(false)
+  }
+  const handleWinnerDialogRemove = () => {
+    console.log({ lastWinner })
+    if (lastWinner !== null) deleteName(lastWinner.index)
+    handleWinnerDialogClose()
+  }
+
+  // const handleListToggle = (value: string) => () => {
+  //   const newChecked = [...checkedNames]
+  //   const index = checkedNames.indexOf(value)
+
+  //   // Adds value of clicked item or removes it (based on checked state)
+  //   if (index === -1) { newChecked.push(value) }
+  //   else { newChecked.splice(index) }
+
+  //   setCheckedNames(newChecked)
+  // }
+
+  // TODO: Replace paper with card, so all have the same layout
   return (
-    <div className="randomon">
-      
-      <p>
-        <b>Share Randomon</b> <input readOnly
-          id="shareRoom"
-          style={{ width: 350, fontSize: "1rem", textAlign: "center" }}
-          value={window.location.href}
-          onFocus={e => e.target.select()} />
+    <Container className={cl.root} disableGutters>
+      {/* Row */}
+      <Grid container spacing={2}>
 
-        {/* <button onClick={async () => {
+        {/* First Column */}
+        <Grid item container md={8} spacing={2}>
 
-          const result = await navigator.permissions.query({ name: "clipboard-write" })
+          {/* Wheel */}
+          <Grid item xs={12}>
+            <Paper className={cls(cl.pad, cl.stretch)}>
+              <Container style={{ textAlign: "center" }} className={cl.stretch}>
+                <Wheel diameter={600} names={names} />
+              </Container>
+            </Paper>
+          </Grid>
 
-          if (result.state === "granted" || result.state === "prompt") {
-            navigator.clipboard.writeText(window.location.href)
-          }
-          // document.querySelector("#shareButton").select()
-          // document.execCommand("copy")
-        }}>Copy</button> */}
-      </p>
+          {/* Control Buttons */}
+          <Grid item xs>
+            <Paper className={cl.pad}>
+              <Grid container spacing={1} direction="row-reverse">
 
-      <div>
-        <Wheel diameter={600} names={names} />
+                {/* Spin Button */}
+                <Grid item style={{ paddingLeft: 8 }}>
+                  <Badge badgeContent={names.length} color="error">
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      disabled={spinning || names.length === 0}
+                      startIcon={<RotateLeftRounded />}
+                      onClick={handleSpin}>
+                      Spin
+                    </Button>
+                  </Badge>
 
-        <textarea
-          ref={namesTextRef}
-          value={names.join("\n")}
-          onChange={e => {
-            const nameList = e.target.value.split("\n")
-            setNames(nameList)
-          }}
-          onBlur={(e) => emitSocket("names", e.target.value.split("\n"))}
-        />
+                  {/* Winner Dialog */}
+                  <Dialog
+                    maxWidth="xs" fullWidth
+                    open={winnerDialogOpen}
+                    onClose={handleWinnerDialogClose}
+                    aria-labelledby="winner-dialog-title"
+                    aria-describedby="winner-dialog-description">
+                    <Typography component={DialogTitle} color="textSecondary" id="winner-dialog-title">
+                      Congratulations!
+                    </Typography>
+                    <DialogContent>
+                      <DialogContentText id="winner-dialog-description">
+                        <Typography color="textPrimary" variant="h4">{lastWinner?.name ?? ""}</Typography>
+                      </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                      <Button onClick={handleWinnerDialogClose} color="primary" variant="outlined">
+                        Close
+                      </Button>
+                      <Button onClick={handleWinnerDialogRemove} color="primary" variant="contained" >
+                        Remove
+                      </Button>
+                    </DialogActions>
+                  </Dialog>
 
-        <button ref={spinButtonRef} onClick={() => {
-          // console.log({ names })
-          if (spinButtonRef.current) spinButtonRef.current.disabled = true
-          if (namesTextRef.current) namesTextRef.current.disabled = true
+                </Grid>
 
-          spin({
-            names,
-            onStart: (duration, rotateAmount) => {
-              // console.log({ spinTime, rotateAmount })
-              emitSocket("spin", duration, rotateAmount)
-            },
-            onFinish: winnerName => {
-              if (spinButtonRef.current) spinButtonRef.current.disabled = false
-              if (namesTextRef.current) namesTextRef.current.disabled = false
+                {/* Popout Button */}
+                <Grid item>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    disabled={spinning}
+                    startIcon={<CollectionsRounded />}
+                    href={window.location.href + "/popout"}
+                    target="_blank">
+                    Popout
+                  </Button>
+                </Grid>
+
+                {/* Clear Button */}
+                <Grid item>
+                  <Button
+                    variant="outlined"
+                    className={cl.errorOutlined}
+                    disabled={spinning || names.length === 0}
+                    startIcon={<DeleteRounded />}
+                    onClick={() => setClearDialogOpen(true)}>
+                    Clear
+                  </Button>
+
+                  {/* TODO: Add undo function for deleted names */}
+                  <Dialog
+                    maxWidth="xs" fullWidth
+                    open={clearDialogOpen}
+                    onClose={() => setClearDialogOpen(false)}
+                    aria-labelledby="name-dialog-title"
+                    aria-describedby="name-dialog-description">
+                    <DialogTitle id="name-dialog-title">Clear names?</DialogTitle>
+                    <DialogContent>
+                      <DialogContentText id="name-dialog-description">
+                        Do you really want to delete all names?<br />
+                        This cannot be undone.
+                      </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                      <Button color="primary" variant="outlined" onClick={() => setClearDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button className={cl.errorOutlined} variant="outlined" onClick={() => {
+                        setNames([])
+                        emitSocket("names", [])
+                        setClearDialogOpen(false)
+                      }}>
+                        Delete
+                      </Button>
+                    </DialogActions>
+                  </Dialog>
+                </Grid>
 
 
-              const winner: Winner = {
-                name: winnerName,
-                date: new Date(Date.now()).toLocaleTimeString()
-              }
 
-              // setWinner(w)
-              setWinners([...winners, winner])
+                {/* And the winner is */}
+                <Grid item xs>
+                  {/* <Container>
+                    <Typography color="textSecondary">
+                      And the winner is ...
+                    </Typography>
+                    <Typography variant="h4" color={winners.length > 0 ? "textPrimary" : "textSecondary"}>
+                      {winners[winners.length - 1]?.name ?? "¯\\_(ツ)_/¯"}
+                    </Typography>
+                  </Container> */}
+                </Grid>
+              </Grid>
+            </Paper>
+          </Grid>
 
-              emitSocket("winner", winner)
-            }
-          })
+        </Grid>
 
-        }}>Spin</button>
+        {/* Second column */}
+        <Grid item container md spacing={2} direction="column" zeroMinWidth >
 
-        <h4>And the winner is ...</h4>
-        <h2>{winners[winners.length - 1]?.name ?? ""}</h2>
+          {/* Share Link */}
+          <Grid item>
+            <Paper className={cl.pad}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                color="primary"
+                label="Share"
+                size="small"
+                defaultValue={`${window.location.host}${window.location.pathname}`}
+                InputProps={{ readOnly: true }} // Reacts base 'Input' element
+                inputProps={{ style: { textAlign: "center" } }} // underlying (native) input element
+                onFocus={e => e.target.select()} />
+            </Paper>
+          </Grid>
 
-        <h4>Previous winners:</h4>
-        <ul>
-          {winners.map((w, i) => (<li key={"li-winner-" + i}><b>{w.name}</b>, {w.date}</li>))}
-        </ul>
-      </div>
+          {/* Name/Winner List */}
+          <Grid item xs>
+            <Paper className={cl.stretch}>
 
-    </div>
+              <Tabs
+                value={tab}
+                onChange={(_, value) => setTab(value)}
+                variant="fullWidth"
+                indicatorColor="primary"
+                textColor="primary">
+                <Tab label="Current Names" />
+                <Tab label="Previous Winners" />
+              </Tabs>
+
+              {/* Names Tab */}
+              <TabPanel index={0} activeTab={tab}>
+                <NamesList names={names} spinning={spinning} addNameRef={addNameRef} addName={addName} deleteName={deleteName} />
+              </TabPanel>
+
+              {/* Winners Tab */}
+              <TabPanel index={1} activeTab={tab}>
+                <WinnerList winners={winners} />
+              </TabPanel>
+
+            </Paper>
+          </Grid>
+
+        </Grid>
+      </Grid>
+
+    </Container >
   )
 }

@@ -1,49 +1,60 @@
 import React from 'react';
-import "./style.css"
-import { BrowserRouter, Link, Redirect, Route, Switch } from "react-router-dom"
-// import { Home } from './pages/Home';
-// import { Login } from './pages/Login';
-// import { Register } from './pages/Register';
+import { BrowserRouter, Route, Switch } from "react-router-dom"
 import { Randomon } from './pages/Randomon';
 import { RandomonHome } from './pages/RandomonHome';
 import { RandomonPopout } from './pages/RandomonPopout';
-import dotenv from "dotenv"
-
-dotenv.config()
+import { Navbar } from './components/Navbar';
+import { Container } from '@material-ui/core';
+import { useStyles } from './Theme';
+import { FlexTest } from './pages/FlexTest';
+import { Footer } from './components/Footer';
+// import "./style.css"
 
 export const App: React.FC = () => {
+  const cl = useStyles()
   return (
-    <div className="App">
-      <BrowserRouter basename="/pokeboard" >
-        {/* Popout Randomon should not have any nav links etc. */}
-        <Switch>
-          <Route exact path="/randomon/:id/popout" ><RandomonPopout /></Route>
-          <Route>
-            <nav>
-              <ul>
-                {/*
-                <li><Link to="/">Home</Link></li>
-                <li><Link to="/login">Login</Link></li>
-                <li><Link to="/register">Register</Link></li>
-                */}
-                <li><Link to="/randomon" >Randomon</Link></li>
-              </ul>
-            </nav>
-          </Route>
-        </Switch>
-        <Switch>
-          <Route exact path="/" ><Redirect to="/randomon" /></Route>
-          {/*
-          <Route exact path="/" ><Home /></Route>
-          <Route exact path="/login" ><Login /></Route>
-          <Route exact path="/register" ><Register /></Route>
-          */}
+    <BrowserRouter>
+      <Switch>
 
-          {/* /random bzw /random/:id */}
-          <Route exact path="/randomon" ><RandomonHome /></Route>
-          <Route exact path="/randomon/:id" ><Randomon /></Route>
+        {/* Popout should not have a navbar */}
+        <Route exact path="/randomon/:id/popout" >
+          <RandomonPopout />
+        </Route>
+
+        <Route><Navbar /></Route>
+
+      </Switch>
+      <Container className={cl.pad}>
+        <Switch>
+
+          <Route exact path="/" >
+            {/* <Redirect to="/randomon" /> */}
+          </Route>
+
+          <Route exact path="/randomon" >
+            <RandomonHome />
+          </Route>
+
+          <Route exact path="/randomon/:id" >
+            <Randomon />
+          </Route>
+
+          <Route exact path="/flextest" >
+            <FlexTest />
+          </Route>
+
         </Switch>
-      </BrowserRouter>
-    </div>
+      </Container>
+      <Switch>
+
+        {/* Popout should not have a footer */}
+        <Route exact path="/randomon/:id/popout" />
+
+        <Route>
+          <Footer />
+        </Route>
+
+      </Switch>
+    </BrowserRouter>
   );
 }
